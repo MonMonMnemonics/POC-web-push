@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="shortcut icon" href="#">
+  <title>notification and push test</title>
+  <style>
+    body { padding: 15px; }
+    #mainBody div {
+        margin-bottom: 7px;
+    }
+  </style>
+</head>
+<body>
+  <script type="application/javascript">
+    function sendSignal() {
+        const payload = document.getElementById("payload").value;
+        const delay = document.getElementById("delay").value;
+        const ttl = document.getElementById("ttl").value;        
+
+
+        fetch("/sendSignal", {
+            method: "post",
+            headers: {
+                "Content-type": "application/json",
+            },
+            body: JSON.stringify({
+                payload,
+                delay,
+                ttl,
+            }),
+        });        
+    }
+  </script>
+  <div id="mainBody" style="flex-direction: column; display: flex; max-width: 200px;">
+    <div>
+        <label>Payload:</label>
+        <input id="payload" value="TEST PUSH" type="text">
+    </div>
+    <div>
+        <label>delay(s):</label>
+        <input id="delay" value="5" type="number">
+    </div>
+    <div>
+        <label>TTL(s):</label>
+        <input id="ttl" value="20" type="number">
+    </div>
+    <button onclick="sendSignal()">SEND SIGNAL</button>
+</div>    
+    
+</body>
+</html>

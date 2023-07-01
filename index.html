@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="shortcut icon" href="#">
+  <title>notification and push test</title>
+  <style>
+    body { padding: 15px; }
+    button { margin-bottom: 7px;}
+  </style>
+</head>
+<body>
+  <script type="application/javascript">
+    let notPerm = (Notification.permission === "granted") ? true : false;
+    function permission() {
+        if (notPerm) {
+            Array.from(document.getElementsByClassName("secondLayer")).forEach(e => {
+                e.removeAttribute("disabled");
+            });
+        } else {
+            Notification.requestPermission().then((e) => {
+                Array.from(document.getElementsByClassName("secondLayer")).forEach(e => {
+                    e.removeAttribute("disabled");
+                });
+            });
+        }
+    }
+
+    function spawnNotif() {
+        new Notification("test notif", {
+            body: "TEST notif " + (new Date()).toString(),
+            icon: "testicon.jpg"
+        })
+    }
+
+    function restartSW() {
+        navigator.serviceWorker.getRegistration("service-worker.js").then(e => {
+            if (e) {
+                e.unregister();
+                return e.pushManager.getSubscription();
+            }
+        }).then(e => {
+            if (e) {
+                e.unsubscribe();
+            }
+        }).then(() => {
+            console.log("VAPID KEY AND SW RESET");
+        }).catch(e => {
+            console.log("ERR " + e);
+        })
+    }
+
+    function urlBase64ToUint8Array(base64String) {
+        let padding = '='.repeat((4 - base64String.length % 4) % 4);
+        let base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+
+        let rawData = atob(base64);
+        let outputArray = new Uint8Array(rawData.length);
+
+        for (var i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+
+    function registerSW() {
+        navigator.serviceWorker.register("service-worker.js", {scope: "/"}).then(e => {
+            console.log("Service worker registered");
+            if (e.installing) {
+                console.log("Service worker installing");
+            } else if (e.waiting) {
+                console.log("Service worker installed");
+            } else if (e.active) {
+                console.log("Service worker active");
+            }
+
+            return e.pushManager.getSubscription().then(async (e2) => {
+                
+                if (e2) {
+                    e2.unsubscribe();
+                } else {
+                    const response = await fetch("/vapid");
+                    const vapidPublicKey = await response.text();
+                    const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+                    return e.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: convertedVapidKey
+                    })
+                }
+            })
+        }).then(e => {
+            return fetch("register", {
+                method: "post",
+                headers: {
+                    "Content-type": "application/json",
+                },
+                body: JSON.stringify(e),
+            });
+        }).then(e => {
+            console.log("Push subscription activated");
+        }).catch(e => {
+            console.log("Register err : " + e);
+        });
+    }
+  </script>
+  <div style="flex-direction: column; display: flex; max-width: 200px;">
+    <button onclick="permission()">ALLOW NOTIF</button>
+    <button class="secondLayer" disabled="true" onclick="spawnNotif()">SPAWN NOTIF</button>
+    <button class="secondLayer" disabled="true" onclick="restartSW()">RESET SW</button>
+    <button class="secondLayer" disabled="true" onclick="registerSW()">REGISTER SERVICE WORKER</button>
+  </div>    
+    
+</body>
+</html>
