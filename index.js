@@ -26,14 +26,17 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/sendSignal", (req, res) => {
-    const payload = req.body.payload;
+    const payload = {
+      msg: req.body.payload,
+      url: "https://3mworkshop.com"
+    };
     const options = {
       TTL: req.body.ttl,
     };
 
     setTimeout(() => {
       clientList.forEach(e => {
-        webpush.sendNotification(e, payload, options).then(() => {
+        webpush.sendNotification(e, JSON.stringify(payload), options).then(() => {
           res.sendStatus(201);
         }).catch((error) => {
           console.log(error);
