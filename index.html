@@ -45,8 +45,10 @@
             }
         }).then(() => {
             console.log("VAPID KEY AND SW RESET");
+            document.getElementById("title").innerHTML = "VAPID KEY AND SW RESET";
         }).catch(e => {
             console.log("ERR " + e);
+            document.getElementById("title").innerHTML = "ERR " + JSON.stringify(e);
         })
     }
 
@@ -98,7 +100,9 @@
             });
         }).then(e => {
             console.log("Push subscription activated");
+            document.getElementById("title").innerHTML = "Push subscription activated";
         }).catch(e => {
+            document.getElementById("title").innerHTML = "Register err : " + JSON.stringify(e);
             console.log("Register err : " + e);
         });
     }
@@ -108,6 +112,7 @@
     <button class="secondLayer" disabled="true" onclick="spawnNotif()">SPAWN NOTIF</button>
     <button class="secondLayer" disabled="true" onclick="restartSW()">RESET SW</button>
     <button class="secondLayer" disabled="true" onclick="registerSW()">REGISTER SERVICE WORKER</button>
+    <h1 id="title"></h1>
   </div>    
     
 </body>

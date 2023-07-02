@@ -17,7 +17,7 @@
         const payload = document.getElementById("payload").value;
         const delay = document.getElementById("delay").value;
         const ttl = document.getElementById("ttl").value;        
-
+        document.getElementById("title").innerHTML = "PUSHING";
 
         fetch("/sendSignal", {
             method: "post",
@@ -29,10 +29,15 @@
                 delay,
                 ttl,
             }),
-        });        
+        }).then(() => {
+            document.getElementById("title").innerHTML = "PUSHED DONE";
+        }).catch((e) => {
+            document.getElementById("title").innerHTML = "ERR " + JSON.stringify(e);
+        });
     }
   </script>
   <div id="mainBody" style="flex-direction: column; display: flex; max-width: 200px;">
+    <h1 id="title"></h1>
     <div>
         <label>Payload:</label>
         <input id="payload" value="TEST PUSH" type="text">

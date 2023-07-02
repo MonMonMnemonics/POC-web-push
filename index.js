@@ -33,14 +33,18 @@ app.post("/sendSignal", (req, res) => {
     const options = {
       TTL: req.body.ttl,
     };
+    res.sendStatus(201);
 
     setTimeout(() => {
       clientList.forEach(e => {
         webpush.sendNotification(e, JSON.stringify(payload), options).then(() => {
-          res.sendStatus(201);
+
         }).catch((error) => {
-          console.log(error);
-          res.sendStatus(500);
+          if (error.body) {
+            if (error.body === "push subscription has unsubscribed or expired.\n") {
+              
+            }
+          }
         });
       })
     }, req.body.delay * 1000);
